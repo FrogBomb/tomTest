@@ -96,7 +96,8 @@ Test.testOutputs = {}##This will be the dict of expected outputs
 
 def toTest(*args, **kwargs):
     """
-    Function decorator for tests.
+    Function decorator for tests.    
+    
     When Test() is run, Test() will iterate through
     all functions decorated with this decorator.
     
@@ -111,16 +112,25 @@ def toTest(*args, **kwargs):
     #This will pass on 1, 2 and fail on 1, 0
     """
     def getToTest(function):
-        Test.tests.append((function, args, kwargs))
-        def newFunc(*nargs, **nkwargs):
-            try:
-                ret = function(*nargs, **nkwargs)
-            except OutputError as e:
-                ret = e.args[1]
-            return ret
-        newFunc.func_name = function.func_name
-        return newFunc
+        if inTests(function):
+            Test.tests.append((function, args, kwargs))
+            return function
+        else:
+            def newFunc(*nargs, **nkwargs):
+                try:
+                    ret = function(*nargs, **nkwargs)
+                except OutputError as e:
+                    ret = e.args[1]
+                return ret
+            Test.tests.append((newFunc, args, kwargs))
+            newFunc.func_name = function.func_name
+            return newFunc
+        
     return getToTest
+    
+def inTests(func):
+    """Sees if the passed function is already in Test.tests"""
+    return func in [t[0] for t in Test.tests]
     
 def checkIsOutput(output, *args, **kwargs):
     """
@@ -141,8 +151,7 @@ def checkIsOutput(output, *args, **kwargs):
             return ret
         newFunc.func_name = function.func_name
         newFunc.output = output
-        newFunc = toTest(*args, **kwargs)(newFunc)
-        return newFunc
+        return toTest(*args, **kwargs)(newFunc)
     return getCheckIsOutput
     
 def checkIsOutInstance(cls, *args, **kwargs):
