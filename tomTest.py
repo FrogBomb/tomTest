@@ -128,7 +128,7 @@ def checkIsOutput(output, *args, **kwargs):
     """
     def getCheckIsOutput(function):
         def newFunc(*nargs, **nkwargs):
-            ret = newFunc._baseFunc(*nargs, **nkwargs)
+            ret = function(*nargs, **nkwargs)
             if output != ret:                   
                 raise OutputError(\
                      function.func_name+" output " +str(ret)+ " not " + str(output),\
@@ -136,11 +136,8 @@ def checkIsOutput(output, *args, **kwargs):
             return ret
         newFunc.func_name = function.func_name
         newFunc.output = output
-        try:
-            newFunc._baseFunc = function._baseFunc
-        except AttributeError:
-            newFunc._baseFunc = function
-        return toTest(*args, **kwargs)(newFunc)
+        toTest(*args, **kwargs)(newFunc)
+        return function
     return getCheckIsOutput
     
 def checkIsOutInstance(cls, *args, **kwargs):
@@ -152,7 +149,7 @@ def checkIsOutInstance(cls, *args, **kwargs):
     """
     def getCheckIsOutInstance(function):
         def newFunc(*nargs, **nkwargs):
-            ret = newFunc._baseFunc(*nargs, **nkwargs)
+            ret = function(*nargs, **nkwargs)
             if not isinstance(ret, cls):
                 raise OutputError(\
                      function.func_name+" output " +str(ret)+ " not a " + str(cls),\
@@ -160,11 +157,8 @@ def checkIsOutInstance(cls, *args, **kwargs):
             return ret
         newFunc.func_name = function.func_name
         newFunc.output = cls
-        try:
-            newFunc._baseFunc = function._baseFunc
-        except AttributeError:
-            newFunc._baseFunc = function
-        return toTest(*args, **kwargs)(newFunc)
+        toTest(*args, **kwargs)(newFunc)
+        return function
     return getCheckIsOutInstance
     
 
