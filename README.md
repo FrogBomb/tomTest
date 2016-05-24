@@ -3,6 +3,7 @@ A unit testing helper for python
 
 #EXAMPLE
 ~~~~{.python}
+clearTests() #Put in main file for testing in console
 @toTest()
 def divideByZero():
     return 1/0
