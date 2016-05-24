@@ -112,20 +112,8 @@ def toTest(*args, **kwargs):
     #This will pass on 1, 2 and fail on 1, 0
     """
     def getToTest(function):
-        if inTests(function):
-            Test.tests.append((function, args, kwargs))
-            return function
-        else:
-            def newFunc(*nargs, **nkwargs):
-                try:
-                    ret = function(*nargs, **nkwargs)
-                except OutputError as e:
-                    ret = e.args[1]
-                return ret
-            Test.tests.append((newFunc, args, kwargs))
-            newFunc.func_name = function.func_name
-            return newFunc
-        
+        Test.tests.append((function, args, kwargs))
+        return function
     return getToTest
     
 def inTests(func):
@@ -140,10 +128,7 @@ def checkIsOutput(output, *args, **kwargs):
     """
     def getCheckIsOutput(function):
         def newFunc(*nargs, **nkwargs):
-            try:
-                ret = function(*nargs, **nkwargs)
-            except OutputError as e:
-                ret = e.args[1]
+            ret = newFunc._baseFunc(*nargs, **nkwargs)
             if output != ret:                   
                 raise OutputError(\
                      function.func_name+" output " +str(ret)+ " not " + str(output),\
@@ -151,6 +136,10 @@ def checkIsOutput(output, *args, **kwargs):
             return ret
         newFunc.func_name = function.func_name
         newFunc.output = output
+        try:
+            newFunc._baseFunc = function._baseFunc
+        except AttributeError:
+            newFunc._baseFunc = function
         return toTest(*args, **kwargs)(newFunc)
     return getCheckIsOutput
     
@@ -163,10 +152,7 @@ def checkIsOutInstance(cls, *args, **kwargs):
     """
     def getCheckIsOutInstance(function):
         def newFunc(*nargs, **nkwargs):
-            try:
-                ret = function(*nargs, **nkwargs)
-            except OutputError as e:
-                ret = e.args[1]
+            ret = newFunc._baseFunc(*nargs, **nkwargs)
             if not isinstance(ret, cls):
                 raise OutputError(\
                      function.func_name+" output " +str(ret)+ " not a " + str(cls),\
@@ -174,8 +160,11 @@ def checkIsOutInstance(cls, *args, **kwargs):
             return ret
         newFunc.func_name = function.func_name
         newFunc.output = cls
-        newFunc = toTest(*args, **kwargs)(newFunc)
-        return newFunc
+        try:
+            newFunc._baseFunc = function._baseFunc
+        except AttributeError:
+            newFunc._baseFunc = function
+        return toTest(*args, **kwargs)(newFunc)
     return getCheckIsOutInstance
     
 
