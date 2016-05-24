@@ -94,6 +94,10 @@ def Test(verbose = False, printOnlyFailure = True):
 Test.tests = []##This will be the list of functions to test.
 Test.testOutputs = {}##This will be the dict of expected outputs
 
+def clearTests():
+    Test.tests = []
+    Test.testOutputs = {}
+
 def toTest(*args, **kwargs):
     """
     Function decorator for tests.    
