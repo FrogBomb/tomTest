@@ -1,6 +1,7 @@
 # tomTest
 A unit testing helper for python
 
+A spiritual precursor to lwf_test
 #EXAMPLE
 ~~~~{.python}
 import tomTest as tt
